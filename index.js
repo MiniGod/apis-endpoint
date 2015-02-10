@@ -17,12 +17,6 @@ function Endpoint() {
 		}
 	};
 
-	endpoint.purge = function(path) {
-		// meh.
-		// for purging paths? ie. endpoint.purge('/some/data');
-		// could only need this if we have workers which stay up to date on the data
-	};
-
 	endpoint.tester = function(path) {
 		return supertest(endpoint)
 			.get(path)
