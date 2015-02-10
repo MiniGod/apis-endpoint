@@ -23,5 +23,10 @@ function Endpoint() {
 			.expect('Content-Type', /json/);
 	}
 
+	endpoint.mounted = false;
+	endpoint.on('mount', function() {
+		endpoint.mounted = true;
+	});
+
 	return endpoint;
 }
