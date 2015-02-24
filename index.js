@@ -17,14 +17,14 @@ function Endpoint() {
 		endpoint._workers.push = {
 			filename: filename,
 			options: options
-		}
+		};
 	};
 
 	endpoint.tester = function(path) {
 		return supertest(endpoint.parent)
 			.get(endpoint.mountpath + path)
 			.expect('Content-Type', /json/);
-	}
+	};
 
 	endpoint.mounted = false;
 	endpoint.on('mount', function(parent) {
