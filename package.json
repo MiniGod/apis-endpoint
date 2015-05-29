@@ -9,6 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "supertest": "^0.15.0"
+    "supertest": "^0.15.0",
+    "bluebird": "~2.9.26",
+    "statuses": "~1.2.1"
   }
 }
