@@ -44,33 +44,17 @@ function Endpoint() {
 			//@TODO We want to have a limited version of req passed in as the obj
 			var obj = req || {};
 
-
-			/*
-				There is a bit of a problem here. We get a function back that returns
-				the promise. We have to execute the endpoint once to find out if it returns
-				a promise or if it throws. This is very bad and needs to be solved in a better way
-			 */
-			var cbResults;
 			var callback;
-
-			//Hack to catch the throw as well
-			try{
-				cbResults = cb(obj,function(){});
-			}catch(e){
-				//It did a throw so it wants a promise wrapper
-				cbResults = undefined;
-			}
-
-			//Find out if it is a deep promise or not
-			if(typeof cbResults === 'undefined' || typeof cbResults.then !== 'function'){
+			if(cb.length === 2){
+				//Is a callback
 				callback = Promise.promisify(cb)(obj);
 			}else{
+				//Is a promise
 				callback = cb(obj);
 			}
 
 			callback
 				.then(function(data) {
-					console.log('IN here');
 					res.json(data);
 				})
 				.catch(function(err) {
