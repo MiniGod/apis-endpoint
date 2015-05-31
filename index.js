@@ -3,6 +3,7 @@ var supertest = require('supertest');
 var Promise = require('bluebird');
 var statuses = require('statuses');
 var _ = require('lodash');
+var domain = require('domain');
 
 module.exports = Endpoint;
 // TODO: export express' properties as well.
@@ -52,35 +53,51 @@ function Endpoint() {
 
 			var callback;
 
-			if(cb.length === 3){
-				//A function has been promisified
-				callback = cb();
-			}else if(typeof cb === 'object'){
-				//It is just a new Promise, should not be like that though
-				//it always returns the same response
-				callback = cb;
-			}else if(cb.length === 2){
-				//It is a standard callback
-				callback = Promise.promisify(cb)(obj);
-			}else{
-				//It is already a promise
-				callback = cb(obj);
-			}
+			//If the endpoint does something terribly wrong it crashes the whole app.
+			//Therefore we need a good strategy to solve it. 
+			//For now lets use error domains
+			var d = domain.create();
 
-			callback
-				.then(function(data) {
-					res.json(data);
-				})
-				.catch(function(err) {
-					console.error(err.stack);
+			d.on('error', function(err) {
+				console.error(err.stack);
 
-					var code = parseInt(err.message);
-
-					err = !isNaN(parseFloat(code)) && isFinite(code) ? code : 500;
-					res.status(err).json({
-						error: statuses[err]
-					});
+				res.status(500).json({
+					error: statuses[500]
 				});
+			});
+
+			d.run(function() {
+
+				if(cb.length === 3){
+					//A function has been promisified
+					callback = cb();
+				}else if(typeof cb === 'object'){
+					//It is just a new Promise, should not be like that though
+					//it always returns the same response
+					callback = cb;
+				}else if(cb.length === 2){
+					//It is a standard callback
+					callback = Promise.promisify(cb)(obj);
+				}else{
+					//It is already a promise
+					callback = cb(obj);
+				}
+
+			  callback
+					.then(function(data) {
+						res.json(data);
+					})
+					.catch(function(err) {
+						console.error(err.stack);
+
+						var code = parseInt(err.message);
+
+						err = !isNaN(parseFloat(code)) && isFinite(code) ? code : 500;
+						res.status(err).json({
+							error: statuses[err]
+						});
+					});
+			});
 		});
 	};
 
